@@ -1,0 +1,39 @@
+#!/bin/bash
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+
+LOG_FILE_NOT_FOUND="No log file found at ${TF_LOG_PATH}"
+
+case "$1" in
+    init )
+        echo "RUN: source $SCRIPT_DIR/terraform_init_vars.sh" ;;
+
+    clear )
+        if [ -f "$TF_LOG_PATH" ]; then
+            echo "" > "$TF_LOG_PATH"
+        else
+            echo "${LOG_FILE_NOT_FOUND}"
+        fi ;;
+
+    destrory )
+        if [ -z TF_LOG_PATH ]; then
+            if [ -f $TF_LOG_PATH ]; then
+                rm $TF_LOG_PATH
+            else
+                echo "${LOG_FILE_NOT_FOUND}"
+            fi
+        fi
+
+        echo "RUN: source $SCRIPT_DIR/terraform_destroy_vars.sh" ;;
+
+    get-perms )
+        if [ -f $TF_LOG_PATH ]; then
+            cat $TF_LOG_PATH | grep -oP "(?<=Response )[a-zA-Z0-9]+/[a-zA-Z0-9]+(?= Details)" | sort | uniq 
+        else
+            echo "${LOG_FILE_NOT_FOUND}"
+        fi ;;
+    * )
+        echo "Commands are init, destroy, clear, and get-perms only"
+        exit 1;;
+esac
+
+exit 0
